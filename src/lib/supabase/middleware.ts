@@ -1,23 +1,15 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { createMiddlewareClient } from '@supabase/ssr';
+import { createMiddlewareClient as createSSRMiddlewareClient } from '@supabase/ssr';
+import type { NextRequest, NextResponse } from 'next/server';
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  const supa = createMiddlewareClient(
+export function createMiddlewareClient(req: NextRequest, res: NextResponse) {
+  return createSSRMiddlewareClient(
     { req, res },
     {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      supabaseUrl: URL,
+      supabaseKey: ANON,
     }
   );
-
-  // refresh/attach session cookies each request
-  await supa.auth.getSession();
-
-  return res;
 }
-
-export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
-};
