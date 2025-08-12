@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServer } from '@/lib/supabase/server'; // ← if yours is named createServerClient, import that
 
 export async function createTabAction(wsId: string, formData: FormData) {
-  const supa = createSupabaseServer(); // or createServerClient()
+  const supa = await createSupabaseServer(); // or createServerClient()
   const { data: { user } } = await supa.auth.getUser();
   if (!user) redirect('/login');
 
@@ -45,7 +45,7 @@ export async function createTabAction(wsId: string, formData: FormData) {
 }
 
 export async function deleteTabAction(wsId: string, tabId: string, _formData: FormData) {
-  const supa = createSupabaseServer(); // or createServerClient()
+  const supa = await createSupabaseServer(); // or createServerClient()
   const { data: { user } } = await supa.auth.getUser();
   if (!user) redirect('/login');
 
