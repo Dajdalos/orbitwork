@@ -1,103 +1,77 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { createServerClient } from '@/lib/supabase/server';
+import { Card } from '@/components/ui/card';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  
+  const supa = await createServerClient();
+  const { data: { user } } = await supa.auth.getUser();
+
+  let workspaces: { id: string; name: string }[] = [];
+  if (user) {
+    const { data } = await supa
+      .from('workspaces')
+      .select('id,name')
+      .order('created_at', { ascending: false })
+      .limit(8);
+    workspaces = (data ?? []) as any;
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="min-h-dvh bg-[#0b0b0f] text-[#e6e6ea]">
+      <section className="max-w-6xl mx-auto px-6 pt-16 pb-20">
+        <div className="max-w-2xl">
+          <h1 className="text-4xl md:text-5xl font-semibold leading-tight">
+            Organize work by month with roles, invoices & photo proofs.
+          </h1>
+          <p className="mt-4 text-dim">
+            Owners manage roles and visibility. Members only see their assigned tabs.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            {user ? (
+              <>
+                <Link href="/workspace/new" className="rounded-md bg-white text-black px-4 py-2 text-sm font-medium hover:bg-white/90 transition">Create workspace</Link>
+                <Link href="/workspaces" className="rounded-md border border-[#2b2b35] px-4 py-2 text-sm hover:bg-white/5 transition">View all my workspaces</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/signup" className="rounded-md bg-white text-black px-4 py-2 text-sm font-medium hover:bg-white/90 transition">Sign up</Link>
+                <Link href="/login" className="rounded-md border border-[#2b2b35] px-4 py-2 text-sm hover:bg-white/5 transition">Log in</Link>
+              </>
+            )}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+        {user && (
+          <div className="mt-14">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Your workspaces</h2>
+              <Link href="/workspaces" className="text-sm text-dim hover:underline">View all</Link>
+            </div>
+            <div className="mt-4 grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {workspaces.map(ws => (
+                <Link key={ws.id} href={`/workspace/${ws.id}`} className="block">
+                  <Card className="p-4 hover:bg-white/5 transition">
+                    <div className="font-medium">{ws.name}</div>
+                    <div className="text-sm text-dim mt-1">{ws.id}</div>
+                  </Card>
+                </Link>
+              ))}
+              {workspaces.length === 0 && (
+                <Card className="p-4">
+                  <div className="text-sm text-dim">No workspaces yet — create your first one.</div>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
+
+      <footer className="max-w-6xl mx-auto px-6 py-10 text-dim text-sm">
+        © {new Date().getFullYear()} OrbitWork
       </footer>
-    </div>
+    </main>
   );
 }
