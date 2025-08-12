@@ -8,8 +8,8 @@ const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE!;
 
-export function createServerClient() {
-  const cookieStore = cookies(); // sync in Next 15
+export async function createServerClient() {
+  const cookieStore = await cookies();
   return createSSRServerClient(URL, ANON, {
     cookies: {
       get(name: string) {
