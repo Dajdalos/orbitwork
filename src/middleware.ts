@@ -9,8 +9,6 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-
-
 export const config = {
   matcher: [
     // Skip static files and api route for static assets
